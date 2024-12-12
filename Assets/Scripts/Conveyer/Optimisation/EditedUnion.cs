@@ -16,6 +16,7 @@ public class EditedUnion{
                 cells[i, j] = null;
             }
         }
+        representatives = new HashSet<Cell>();
     }
     
     //methods for gettings data
@@ -42,14 +43,14 @@ public class EditedUnion{
         if(cell == null){
             return null;
         }
-        while(cell.next != cell){
-            if(visited.Contains(cell)){
-                return cell;
-            }
-            visited.Add(cell);
-            return getRepresentative(cell.next.position, visited);
+        if(visited.Contains(cell)){
+            return cell;
         }
-        return cell;
+        if(cell.next == cell){
+            return cell;
+        }
+        visited.Add(cell);
+        return getRepresentative(cell.next.position, visited);
     }
     
     public List<Cell> getRepresentatives(){
@@ -68,6 +69,11 @@ public class EditedUnion{
         cell.next = getNextValid(pos, rotation);
         cell.rotation = rotation;
         cell.previous = getPrevCells(pos, rotation);
+        
+        //add the cell to the previous cells
+        foreach(Cell c in cell.previous){
+            c.next = cell;
+        }
         
         calculateRepresentative();
     }
@@ -114,15 +120,15 @@ public class EditedUnion{
             prev.Add(cells[pos.x, pos.y + 1]);
             cells[pos.x, pos.y + 1].next = cells[pos.x, pos.y];
         }
-        if(rotation == 1 && pos.x +1 < width && cells[pos.x + 1, pos.y] != null){
+        if(pos.x +1 < width && cells[pos.x + 1, pos.y] != null && cells[pos.x + 1, pos.y].rotation == 3){
             prev.Add(cells[pos.x + 1, pos.y]);
             cells[pos.x + 1, pos.y].next = cells[pos.x, pos.y];
         }
-        if(rotation == 2 && pos.y -1 >= 0 && cells[pos.x, pos.y - 1] != null){
+        if(pos.y -1 >= 0 && cells[pos.x, pos.y - 1] != null && cells[pos.x, pos.y - 1].rotation == 0){
             prev.Add(cells[pos.x, pos.y - 1]);
             cells[pos.x, pos.y - 1].next = cells[pos.x, pos.y];
         }
-        if(rotation == 3 && pos.x -1 >= 0 && cells[pos.x - 1, pos.y] != null){
+        if(pos.x -1 >= 0 && cells[pos.x - 1, pos.y] != null && cells[pos.x - 1, pos.y].rotation == 1){
             prev.Add(cells[pos.x - 1, pos.y]);
             cells[pos.x - 1, pos.y].next = cells[pos.x, pos.y];
         }
